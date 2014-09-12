@@ -1,0 +1,20 @@
+{
+  "name": "listenToTyping",
+  "version": "0.0.0",
+  "homepage": "https://github.com/martyshu/listenToTyping",
+  "authors": [
+    "marty <marty.shu@gmail.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "google-youtube": "GoogleWebComponents/google-youtube#~0.0.5",
+    "polymer": "~0.4.0"
+  }
+}
