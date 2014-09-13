@@ -35,7 +35,7 @@
       $(player).attr('videoid',self.videoid);
       for(var i=0;i<rawData.length;i++){
         var c = rawData.charAt(i);
-        if(',. ?'.indexOf(c)>-1){
+        if(',. ?!'.indexOf(c)>-1){
           ctx.push(term);
           ctx.push(c);
           term = '';
@@ -46,7 +46,7 @@
       var size = $(this).attr('fontsize');
       $(this).html('');
       $(ctx).each(function(idx,term){
-        if(term.length==1 && ',. ?'.indexOf(term)>-1){
+        if(term.length==1 && ',. ?!'.indexOf(term)>-1){
           $(self).append(term);
           return;
         }
