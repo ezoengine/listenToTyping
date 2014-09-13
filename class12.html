@@ -50,11 +50,11 @@ function clips(clips,cb) {
   });
   cb(data);
 }
-  loadVideoData('1TaWBYdTEQUBvALKj9uwDY5c1S-P6dMjBXo3sIVz9k_M',function(data){
+  loadVideoData('11Y1_yZFtuxodJTi1P-r4w3mk-eeLOwXM88aveuyuNik',function(data){
     console.log('read data done.');
-    var key = 'U666rYqdS7s';
+    var key = 'cFdCzN7RYbw';
     data = data[key];
-    var start=43,end=59;
+    var start=2,end=16;
     for(var i=start-2;i<end-1;i++){
       $('body').append('<h1 style="color:#fff">'+(i+3-start)+'</h1>');
       var time = data[i][0]+','+data[i][1];

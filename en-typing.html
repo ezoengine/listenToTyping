@@ -1,0 +1,107 @@
+<link rel="import" href="bower_components/polymer/polymer.html">
+<link rel="import" href="bower_components/voice-elements/dist/voice-player.html">
+<link rel="import" href="bower_components/google-youtube/google-youtube.html">
+<script src="jquery-2.1.1.min.js"></script>
+<polymer-element name="en-typing" attributes='videoid time'>
+  <template>
+    <style>
+    </style>
+    <div videoid='{{videoid}}'></div>
+  <content></content>
+  </template>
+  <script>
+  (function(){
+  var player = $('<google-youtube height="0px" width="0px" rel="0" start="5"></google-youtube>')[0];
+  var voice = $('<voice-player accent="en"></voice-player>')[0];
+  $('body').append(player).append(voice);
+  Polymer({
+    playTimeoutId:'',
+    play:function(len){
+      var start = len.split(',')[0].trim();
+      var end = len.split(',')[1].trim();
+      var self = this;
+      player.seekTo(start);
+      player.play();
+      var duTime = (end - start) * 1000;
+      clearTimeout(self.playTimeoutId);
+      self.playTimeoutId = setTimeout(function () {
+        player.pause();
+      }, duTime);
+    },
+    ready: function(){
+      var self = this;
+      var ctx = [],term ='';
+      var rawData = $(this).html().trim();
+      $(player).attr('videoid',self.videoid);
+      for(var i=0;i<rawData.length;i++){
+        var c = rawData.charAt(i);
+        if(',. ?!'.indexOf(c)>-1){
+          ctx.push(term);
+          ctx.push(c);
+          term = '';
+        } else{
+          term += c;
+        }
+      }
+      var size = $(this).attr('fontsize');
+      $(this).html('');
+      $(ctx).each(function(idx,term){
+        if(term.length==1 && ',. ?!'.indexOf(term)>-1){
+          $(self).append(term);
+          return;
+        }
+        if(term.length>0){
+        var input = $("<input type='text' maxlength='"+term.length+"' >");
+        input.css({
+          'background-color':'#000',
+          'color':'#fff',
+          'font-size':size+'px',
+          'width':term.length*size*2/3+'px',
+          'text-align':'center'
+        });
+        input.data('ans',term);
+        input.on('keyup',function(e){
+          var ele = e.originalEvent.srcElement;
+          console.log('keyCode',e.keyCode);
+          //Mac [cmd]
+          if(e.keyCode==91 || e.keyCode==188){
+            var val = $(ele).val();
+            $(ele).val(val.replace(',',''));
+            self.play(self.time);
+            return;
+          }
+          if(e.keyCode==191 || e.keyCode==190){
+            var ans = $(ele).data('ans');
+            voice.text = ans;
+            setTimeout(function(){
+              voice.speak();
+            },100);
+            $(ele).css('color','#f78');
+            $(ele).val('');
+            $(ele).attr('placeholder',ans);
+            return;
+          }
+          var value = ele.value;
+          var maxval = parseInt($(ele).attr('maxlength'));
+          var len = value.length;
+          if(len==0 && e.keyCode==8){
+            $(ele).prev('input').focus();
+          }
+          if(len>=maxval && e.keyCode!=9 && e.keyCode!=16){
+            $(ele).next('input').focus();
+            var ans = $(ele).data('ans');
+            if(ans==value){
+              var newEle = $('<span>'+value+'</span>').css('font-size',size+"px");
+              newEle.css('color',$(ele).css('color'));
+              $(ele).replaceWith(newEle);
+            }
+          }
+        });
+        $(self).append(input).append(' ');
+        }
+      });
+    }
+  });
+})();
+  </script>
+</polymer-element>
