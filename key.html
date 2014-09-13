@@ -2,16 +2,19 @@
 <html>
 <head>
   <script src='jquery-2.1.1.min.js'></script>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
   <style>
   </style>
 </head>
 <body unresolved>
-  <input type='text' style="font-size:42px;width:300px">
+  <input id='ii' type='text' style="font-size:42px;width:300px">
   <div id='msg' style="font-size:42px"></div>
   <script>
-  $('input').on('keyup',function(e){
-    $('#msg').html(e.keyCode);
-  });
+document.getElementById('ii').onkeydown = function(e){
+  e.keyCode = 100;
+    $('#msg').html(':>'+e.which+","+e.keyCode);
+}
   </script>
 </body>
 

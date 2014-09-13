@@ -62,15 +62,16 @@
         input.data('ans',term);
         input.on('keyup',function(e){
           var ele = e.originalEvent.srcElement;
+          var val = $(ele).val();
           console.log('keyCode',e.keyCode);
           //Mac [cmd]
-          if(e.keyCode==91 || e.keyCode==188){
-            var val = $(ele).val();
+          if(val.indexOf(',')>-1 || e.keyCode==91 || e.keyCode==188){
             $(ele).val(val.replace(',',''));
             self.play(self.time);
             return;
           }
-          if(e.keyCode==191 || e.keyCode==190){
+          if(val.indexOf('.')>-1 || e.keyCode==191 || e.keyCode==190){
+            $(ele).val(val.replace('.',''));
             var ans = $(ele).data('ans');
             voice.text = ans;
             setTimeout(function(){
