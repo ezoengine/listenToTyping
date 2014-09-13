@@ -47,30 +47,30 @@
       $(this).html('');
       $(ctx).each(function(idx,term){
         if(term.length==1 && ',. ?'.indexOf(term)>-1){
-          $(self).append($('<span>'+term+'</span>').css('color',"#fff"));
+          $(self).append(term);
           return;
         }
         if(term.length>0){
         var input = $("<input type='text' maxlength='"+term.length+"' >");
         input.css({
+          'background-color':'#000',
+          'color':'#fff',
           'font-size':size+'px',
           'width':term.length*size*2/3+'px',
-          'text-align':'center',
-          'color':'#fff',
-          'background-color':'#000'
+          'text-align':'center'
         });
         input.data('ans',term);
         input.on('keyup',function(e){
           var ele = e.originalEvent.srcElement;
           console.log('keyCode',e.keyCode);
           //Mac [cmd]
-          if(e.keyCode==91 || e.keyCode==189){
-            var val = $(ele).val().replace('-','');
-            $(ele).val(val);
+          if(e.keyCode==91 || e.keyCode==188){
+            var val = $(ele).val();
+            $(ele).val(val.replace(',',''));
             self.play(self.time);
             return;
           }
-          if(e.keyCode==191){
+          if(e.keyCode==191 || e.keyCode==190){
             var ans = $(ele).data('ans');
             voice.text = ans;
             setTimeout(function(){
