@@ -7,13 +7,10 @@
   <script src="bower_components/platform/platform.js">
   </script>
   <link rel="import" href="en-typing.html">
-  <link rel="import" href="bower_components/google-youtube/google-youtube.html">
   <style>
   </style>
 </head>
-
-<body unresolved>
-  
+<body unresolved style='background-color:#000'>
     <script>
 function loadVideoData(vid,cb) {
   nowIdx = 0;
@@ -54,11 +51,12 @@ function clips(clips,cb) {
   cb(data);
 }
   loadVideoData('1TaWBYdTEQUBvALKj9uwDY5c1S-P6dMjBXo3sIVz9k_M',function(data){
+    console.log('read data done.');
     var key = 'U666rYqdS7s';
     data = data[key];
-    var start=35,end=42;
+    var start=43,end=59;
     for(var i=start-2;i<end-1;i++){
-      $('body').append('<h1>'+(start-i+1)+'</h1>');
+      $('body').append('<h1 style="color:#fff">'+(i+3-start)+'</h1>');
       var time = data[i][0]+','+data[i][1];
       var sentence = data[i][2];
       $('body').append("<en-typing id='term' fontsize='24' videoid='"+key+"' time='"+time+"'>"+sentence+"</en-typing>").append("<br><br><hr>");

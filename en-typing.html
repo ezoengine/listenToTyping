@@ -1,20 +1,25 @@
 <link rel="import" href="bower_components/polymer/polymer.html">
-<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+<link rel="import" href="bower_components/voice-elements/dist/voice-player.html">
+<link rel="import" href="bower_components/google-youtube/google-youtube.html">
+<script src="jquery-2.1.1.min.js"></script>
 <polymer-element name="en-typing" attributes='videoid time'>
   <template>
     <style>
     </style>
-  <google-youtube id='player' videoid="{{videoid}}" height="0px" width="0px" rel="0" start="5"></google-youtube>  
+    <div videoid='{{videoid}}'></div>
   <content></content>
   </template>
   <script>
+  (function(){
+  var player = $('<google-youtube height="0px" width="0px" rel="0" start="5"></google-youtube>')[0];
+  var voice = $('<voice-player accent="en"></voice-player>')[0];
+  $('body').append(player).append(voice);
   Polymer({
     playTimeoutId:'',
     play:function(len){
       var start = len.split(',')[0].trim();
       var end = len.split(',')[1].trim();
       var self = this;
-      var player = self.$.player;
       player.seekTo(start);
       player.play();
       var duTime = (end - start) * 1000;
@@ -27,9 +32,10 @@
       var self = this;
       var ctx = [],term ='';
       var rawData = $(this).html().trim();
+      $(player).attr('videoid',self.videoid);
       for(var i=0;i<rawData.length;i++){
         var c = rawData.charAt(i);
-        if(c==' ' || c==',' || c=='.'){
+        if(',. ?'.indexOf(c)>-1){
           ctx.push(term);
           ctx.push(c);
           term = '';
@@ -40,17 +46,8 @@
       var size = $(this).attr('fontsize');
       $(this).html('');
       $(ctx).each(function(idx,term){
-        if(term.length==1 && term==','){
-          $(self).append(',&nbsp;');
-          return;
-        }else if(term.length==1 && term==' '){
-          $(self).append('&nbsp;');
-          return;
-        }else if(term.length==1 && term=='.'){
-          $(self).append('.');
-          return;
-        }else if(term.length==1 && term=='?'){
-          $(self).append('?');
+        if(term.length==1 && ',. ?'.indexOf(term)>-1){
+          $(self).append($('<span>'+term+'</span>').css('color',"#fff"));
           return;
         }
         if(term.length>0){
@@ -58,16 +55,32 @@
         input.css({
           'font-size':size+'px',
           'width':term.length*size*2/3+'px',
-          'text-align':'center'
+          'text-align':'center',
+          'color':'#fff',
+          'background-color':'#000'
         });
         input.data('ans',term);
         input.on('keyup',function(e){
+          var ele = e.originalEvent.srcElement;
+          console.log('keyCode',e.keyCode);
           //Mac [cmd]
-          if(e.keyCode==91){
+          if(e.keyCode==91 || e.keyCode==189){
+            var val = $(ele).val().replace('-','');
+            $(ele).val(val);
             self.play(self.time);
             return;
           }
-          var ele = e.originalEvent.srcElement;
+          if(e.keyCode==191){
+            var ans = $(ele).data('ans');
+            voice.text = ans;
+            setTimeout(function(){
+              voice.speak();
+            },100);
+            $(ele).css('color','#f78');
+            $(ele).val('');
+            $(ele).attr('placeholder',ans);
+            return;
+          }
           var value = ele.value;
           var maxval = parseInt($(ele).attr('maxlength'));
           var len = value.length;
@@ -79,6 +92,7 @@
             var ans = $(ele).data('ans');
             if(ans==value){
               var newEle = $('<span>'+value+'</span>').css('font-size',size+"px");
+              newEle.css('color',$(ele).css('color'));
               $(ele).replaceWith(newEle);
             }
           }
@@ -88,5 +102,6 @@
       });
     }
   });
+})();
   </script>
 </polymer-element>
