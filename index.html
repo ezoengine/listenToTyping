@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
 <head>
-  <title>unquote</title>
+  <title></title>
   <meta name="viewport" 
   content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
   <script src="bower_components/platform/platform.js">
@@ -11,7 +11,7 @@
   </style>
 </head>
 <body unresolved style='background-color:#000;color:#fff'>
-    <script>
+<script>
 function loadVideoData(vid,cb) {
   nowIdx = 0;
   var importEngTerm = "https://spreadsheets.google.com/feeds/list/" + vid + "/od6/public/values?alt=json";
@@ -41,6 +41,7 @@ function clips(clips,cb) {
     videoId = clip.videoid;
     var row = clip.time.split(',');
     row.push(clip.sentence);
+    row.push(clip.mark);
     if (!(videoId in data)) {
       data[videoId] = [];
     }
@@ -50,19 +51,30 @@ function clips(clips,cb) {
   });
   cb(data);
 }
-  loadVideoData('1TaWBYdTEQUBvALKj9uwDY5c1S-P6dMjBXo3sIVz9k_M',function(data){
-    console.log('read data done.');
-    var key = 'U666rYqdS7s';
-    data = data[key];
-    var start=43,end=59;
-    for(var i=start-2;i<end-1;i++){
-      $('body').append('<h1 style="color:#fff">'+(i+3-start)+'</h1>');
-      var time = data[i][0]+','+data[i][1];
-      var sentence = data[i][2];
-      $('body').append("<en-typing id='term' fontsize='24' videoid='"+key+"' time='"+time+"'>"+sentence+"</en-typing>").append("<br><br><hr>");
-    }
-  });
-  </script>
-</body>
 
+var classes = [
+  '1TaWBYdTEQUBvALKj9uwDY5c1S-P6dMjBXo3sIVz9k_M',
+  '11Y1_yZFtuxodJTi1P-r4w3mk-eeLOwXM88aveuyuNik'
+];
+loadVideoData(classes[1],function(data){
+  for(var key in data){break;}
+  data = data[key];
+  var newData = [];
+  console.log('read data done.',key);
+  for(var start=0;start<data.length;start++){
+    var mark = data[start][3];
+    if(mark.length>0){
+      newData.push(data[start]);
+    }
+  }
+  data = newData;
+  for(var i=0;i<data.length;i++){
+    $('body').append('<h1 style="color:#fff">'+(i+1)+'</h1>');
+    var time = data[i][0]+','+data[i][1];
+    var sentence = data[i][2];
+    $('body').append("<en-typing id='term' fontsize='24' videoid='"+key+"' time='"+time+"'>"+sentence+"</en-typing>").append("<br><br><hr>");
+  }
+});
+</script>
+</body>
 </html>

@@ -15,27 +15,42 @@
   var voice = $('<voice-player accent="en"></voice-player>')[0];
   $('body').append(player).append(voice);
   Polymer({
+    intervalId:'',
     playTimeoutId:'',
-    play:function(len){
-      var start = len.split(',')[0].trim();
-      var end = len.split(',')[1].trim();
+    playNewStartTime:0,
+    playCurrentTime:0,
+    playTime:function(){
       var self = this;
+      self.intervalId = setInterval(function(){
+        self.playCurrentTime += 10;
+      },10);
+    },
+    play:function(len){
+      var self = this;
+      var start = len.split(',')[0].trim();
+      start = self.playNewStartTime+parseFloat(start);
+      var end = len.split(',')[1].trim();
       player.seekTo(start);
       player.play();
       var duTime = (end - start) * 1000;
       clearTimeout(self.playTimeoutId);
+      clearInterval(self.intervalId);
+      self.playCurrentTime = 0;
+      self.playTime();
       self.playTimeoutId = setTimeout(function () {
         player.pause();
+        clearInterval(self.intervalId);
+        self.playCurrentTime = 0;
       }, duTime);
     },
     ready: function(){
       var self = this;
-      var ctx = [],term ='';
+      var ctx = [],term ='',escapeChar=',. ?!"';
       var rawData = $(this).html().trim();
       $(player).attr('videoid',self.videoid);
       for(var i=0;i<rawData.length;i++){
         var c = rawData.charAt(i);
-        if(',. ?!'.indexOf(c)>-1){
+        if(escapeChar.indexOf(c)>-1){
           ctx.push(term);
           ctx.push(c);
           term = '';
@@ -46,7 +61,7 @@
       var size = $(this).attr('fontsize');
       $(this).html('');
       $(ctx).each(function(idx,term){
-        if(term.length==1 && ',. ?!'.indexOf(term)>-1){
+        if(term.length==1 && escapeChar.indexOf(term)>-1){
           $(self).append(term);
           return;
         }
@@ -63,14 +78,18 @@
         input.on('keyup',function(e){
           var ele = e.originalEvent.srcElement;
           var val = $(ele).val();
-          console.log('keyCode',e.keyCode);
           //Mac [cmd]
-          if(val.indexOf(',')>-1 || e.keyCode==91 || e.keyCode==188){
+          if(val.indexOf(',')>-1 || e.keyCode==91 /* MacCmd */ ){
             $(ele).val(val.replace(',',''));
             self.play(self.time);
             return;
           }
-          if(val.indexOf('.')>-1 || e.keyCode==191 || e.keyCode==190){
+          else if(val.indexOf('!')>-1){
+            $(ele).val(val.replace('!',''));
+            self.playNewStartTime = self.playNewStartTime==0 ? self.playCurrentTime/1000.0 : 0;
+            return;
+          }
+          else if(val.indexOf('.')>-1){
             $(ele).val(val.replace('.',''));
             var ans = $(ele).data('ans');
             voice.text = ans;
