@@ -56,7 +56,14 @@ var classes = [
   '1TaWBYdTEQUBvALKj9uwDY5c1S-P6dMjBXo3sIVz9k_M',
   '11Y1_yZFtuxodJTi1P-r4w3mk-eeLOwXM88aveuyuNik'
 ];
-loadVideoData(classes[1],function(data){
+
+var track = window.location.href;
+if(track.indexOf('#')>0){
+  track =track.substring(track.indexOf('#')+1);
+}else {
+  track = '1TaWBYdTEQUBvALKj9uwDY5c1S-P6dMjBXo3sIVz9k_M';
+}
+loadVideoData(track,function(data){
   for(var key in data){break;}
   data = data[key];
   var newData = [];
