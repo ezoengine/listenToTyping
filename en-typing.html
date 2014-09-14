@@ -19,6 +19,7 @@
     playTimeoutId:'',
     playNewStartTime:0,
     playCurrentTime:0,
+    ans:'',
     playTime:function(){
       var self = this;
       self.intervalId = setInterval(function(){
@@ -45,8 +46,9 @@
     },
     ready: function(){
       var self = this;
-      var ctx = [],term ='',escapeChar=',. ?!"';
+      var ctx = [],term ='',escapeChar=',. ?!":;';
       var rawData = $(this).html().trim();
+      self.ans = rawData;
       $(player).attr('videoid',self.videoid);
       for(var i=0;i<rawData.length;i++){
         var c = rawData.charAt(i);
@@ -58,6 +60,7 @@
           term += c;
         }
       }
+      ctx.push(term);
       var size = $(this).attr('fontsize');
       $(this).html('');
       $(ctx).each(function(idx,term){
@@ -87,6 +90,7 @@
           else if(val.indexOf('!')>-1){
             $(ele).val(val.replace('!',''));
             self.playNewStartTime = self.playNewStartTime==0 ? self.playCurrentTime/1000.0 : 0;
+            console.log('currentTime',player.currenttime);
             return;
           }
           else if(val.indexOf('.')>-1){
@@ -120,6 +124,7 @@
         $(self).append(input).append(' ');
         }
       });
+      $(self).append('<br><span style="color:#000">'+self.ans+'</span>');
     }
   });
 })();
