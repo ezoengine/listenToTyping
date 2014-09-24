@@ -2,7 +2,7 @@
 <link rel="import" href="bower_components/voice-elements/dist/voice-player.html">
 <link rel="import" href="bower_components/google-youtube/google-youtube.html">
 <script src="jquery-2.1.1.min.js"></script>
-<polymer-element name="en-typing" attributes='videoid time'>
+<polymer-element name="en-typing" attributes='videoid time fontsize'>
   <template>
     <style>
     </style>
@@ -14,18 +14,32 @@
   var player = $('<google-youtube height="0px" width="0px" rel="0" start="5"></google-youtube>')[0];
   var voice = $('<voice-player accent="en"></voice-player>')[0];
   $('body').append(player).append(voice);
+  
   Polymer({
+    ans:'',
     intervalId:'',
     playTimeoutId:'',
     playNewStartTime:0,
     playCurrentTime:0,
-    ans:'',
+    escapeChar:',. ?!":;',
+    autoCompare: false,
+    fontsize: 24,
+
+    compare:function(){
+      var self = this;
+      var inputs = $(this).find('input');
+      $.each(inputs,function(idx,ele){
+        self.replaceAns(ele);
+      });
+    },
+
     playTime:function(){
       var self = this;
       self.intervalId = setInterval(function(){
-        self.playCurrentTime += 10;
+        self.playCurrentTime += 10; //10ms
       },10);
     },
+
     play:function(len){
       var self = this;
       var start = len.split(',')[0].trim();
@@ -44,15 +58,19 @@
         self.playCurrentTime = 0;
       }, duTime);
     },
+
     ready: function(){
-      var self = this;
-      var ctx = [],term ='',escapeChar=',. ?!":;';
-      var rawData = $(this).html().trim();
-      self.ans = rawData;
-      $(player).attr('videoid',self.videoid);
+      $(player).attr('videoid',this.videoid);
+      this.createInputField();
+    },
+
+    crawlWord : function(){
+      var term ='';
+      var ctx = [],rawData = $(this).html().trim();
+      this.ans = rawData;
       for(var i=0;i<rawData.length;i++){
         var c = rawData.charAt(i);
-        if(escapeChar.indexOf(c)>-1){
+        if(this.escapeChar.indexOf(c)>-1){
           ctx.push(term);
           ctx.push(c);
           term = '';
@@ -61,10 +79,15 @@
         }
       }
       ctx.push(term);
-      var size = $(this).attr('fontsize');
       $(this).html('');
+      return ctx;
+    },
+
+    createInputField : function(){
+      var self = this;
+      var ctx = this.crawlWord();
       $(ctx).each(function(idx,term){
-        if(term.length==1 && escapeChar.indexOf(term)>-1){
+        if(term.length==1 && self.escapeChar.indexOf(term)>-1){
           $(self).append(term);
           return;
         }
@@ -73,59 +96,88 @@
         input.css({
           'background-color':'#000',
           'color':'#fff',
-          'font-size':size+'px',
-          'width':term.length*size*2/3+'px',
+          'font-size':self.fontsize+'px',
+          'width':term.length*self.fontsize*2/3+'px',
           'text-align':'center'
         });
         input.data('ans',term);
-        input.on('keyup',function(e){
-          var ele = e.originalEvent.srcElement;
-          var val = $(ele).val();
-          //Mac [cmd]
-          if(val.indexOf(',')>-1 || e.keyCode==91 /* MacCmd */ ){
-            $(ele).val(val.replace(',',''));
-            self.play(self.time);
-            return;
-          }
-          else if(val.indexOf('!')>-1){
-            $(ele).val(val.replace('!',''));
-            self.playNewStartTime = self.playNewStartTime==0 ? self.playCurrentTime/1000.0 : 0;
-            console.log('currentTime',player.currenttime);
-            return;
-          }
-          else if(val.indexOf('.')>-1){
-            $(ele).val(val.replace('.',''));
-            var ans = $(ele).data('ans');
-            voice.text = ans;
-            setTimeout(function(){
-              voice.speak();
-            },100);
-            $(ele).css('color','#f78');
-            $(ele).val('');
-            $(ele).attr('placeholder',ans);
-            return;
-          }
-          var value = ele.value;
-          var maxval = parseInt($(ele).attr('maxlength'));
-          var len = value.length;
-          if(len==0 && e.keyCode==8){
-            $(ele).prev('input').focus();
-          }
-          if(len>=maxval && e.keyCode!=9 && e.keyCode!=16){
-            $(ele).next('input').focus();
-            var ans = $(ele).data('ans');
-            if(ans==value){
-              var newEle = $('<span>'+value+'</span>').css('font-size',size+"px");
-              newEle.css('color',$(ele).css('color'));
-              $(ele).replaceWith(newEle);
-            }
-          }
-        });
         $(self).append(input).append(' ');
         }
+      });   
+      this.addKeyEvent();
+      $(this).append('<br><span style="color:#000">'+this.ans+'</span>');   
+    },
+
+    addKeyEvent : function(){
+      var self = this;
+      $(self).on('keyup',function(e){
+        var ele = e.originalEvent.srcElement;
+        var val = $(ele).val();
+        //Mac [cmd]
+        if(val.indexOf(',')>-1 || e.keyCode==91 /* MacCmd */ ){
+          $(ele).val(val.replace(',',''));
+          self.play(self.time);
+          return;
+        }
+        else if(val.indexOf('!')>-1){
+          $(ele).val(val.replace('!',''));
+          self.playNewStartTime = self.playNewStartTime==0 ? self.playCurrentTime/1000.0 : 0;
+          return;
+        }
+        else if(val.indexOf('.')>-1){
+          $(ele).val(val.replace('.',''));
+          var ans = $(ele).data('ans');
+          voice.text = ans;
+          setTimeout(function(){
+            voice.speak();
+          },100);
+          $(ele).css('color','#f78');
+          $(ele).val('');
+          $(ele).attr('placeholder',ans);
+          return;
+        }
+        var value = ele.value;
+        var maxval = parseInt($(ele).attr('maxlength'));
+        var len = value.length;
+        if(len==0 && e.keyCode==8){
+          $(ele).prev('input').focus();
+        }
+        if(len>=maxval && e.keyCode!=9 && e.keyCode!=16){
+          // find next input
+          $(':input:eq(' + ($(':input').index(ele) + 1) + ')').focus();
+          if(self.autoCompare){
+            self.replaceAns(ele);
+          } else if(self.readyToCompare()){
+            self.compare();
+          }
+        }
       });
-      $(self).append('<br><span style="color:#000">'+self.ans+'</span>');
+    },
+
+    readyToCompare : function(){
+      var self = this;
+      var inputs = $(this).find('input');
+      var completedWord = 0;
+      $.each(inputs,function(idx,ele){
+        var maxLen = $(ele).attr('maxlength');
+        var valueLen = $(ele).val().length;
+        if(maxLen==valueLen) completedWord++;
+      });
+      return inputs.length == completedWord;
+    },
+
+    replaceAns : function(ele){
+      var ans = $(ele).data('ans');
+      var value = ele.value;
+      if(ans==value){
+        var newEle = $('<span>'+value+'</span>').css('font-size',this.fontsize+"px");
+        newEle.css('color',$(ele).css('color'));
+        $(ele).replaceWith(newEle);
+      }else {
+        $(ele).css({border: '1px solid #Faa'});
+      }
     }
+
   });
 })();
   </script>
