@@ -139,7 +139,7 @@
         var value = ele.value;
         var maxval = parseInt($(ele).attr('maxlength'));
         var len = value.length;
-        if(len==0 && e.keyCode==8){
+        if($(ele).data('lastlen')==0 && e.keyCode==8){
           $(ele).prev('input').focus();
         }
         if(len>=maxval && e.keyCode!=9 && e.keyCode!=16){
@@ -151,6 +151,7 @@
             self.compare();
           }
         }
+        $(ele).data('lastlen',len);
       });
     },
 

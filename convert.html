@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+<head>
+  <meta name="viewport" 
+  content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <script src="bower_components/platform/platform.js"></script>
+  <script src="jquery-2.1.1.min.js"></script>
+  </script>
+</head>
+<body >
+<script>
+  var data = [];
+
+var csv = '';
+for(var i=0;i<data.length;i=i+3){
+  var t = data[i+1].replace(/,/g,'.').trim().split(' --> ');
+  t[0] = t[0].trim();
+  t[1] = t[1].trim();
+  console.log('"'+t[0]+'"');
+  console.log('"'+t[1]+'"');
+  t = parseInt(t[0].substring(0,2))*3600+
+      parseInt(t[0].substring(3,5))*60+
+      parseInt(t[0].substring(6,8))+'.'+t[0].substring(9)+
+      ','+
+      (parseInt(t[1].substring(0,2))*3600+
+      parseInt(t[1].substring(3,5))*60+
+      parseInt(t[1].substring(6,8)))+'.'+t[1].substring(9);
+  console.log(t);
+  var row = "<tr>";
+  row += '<td>'+data[i]+'</td><td>'+t+'</td><td>'+data[i+2]+'</td>';
+  row += "</tr>"
+  csv += row;
+}
+$('body').append('<table>'+csv+'</table>');
+</script>
+</body>
+</html>
